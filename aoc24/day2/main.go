@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
+	"utility"
 )
 
 func checkLevel(level []int) bool {
