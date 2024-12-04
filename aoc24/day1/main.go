@@ -5,10 +5,11 @@ import (
 	"io"
 	"log/slog"
 	"math"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
 )
 
 func parse(dataInput io.Reader) (array1 []int, array2 []int) {
@@ -81,14 +82,10 @@ func countMatches(match int, locations []int) (count int) {
 }
 
 func main() {
-	dataFile, err := os.Open("input.txt")
+	inputReader := utility.GetInputReader()
+	defer inputReader.Close()
 
-	if err != nil {
-		slog.Error("got an error while trying to open input file", "Error", err)
-	}
-	defer dataFile.Close()
-
-	locations1, locations2 := parse(dataFile)
+	locations1, locations2 := parse(inputReader)
 
 	if locations1 == nil || locations2 == nil {
 		slog.Error("locations data is empty")
