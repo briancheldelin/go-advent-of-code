@@ -8,38 +8,38 @@ import (
 	"utility"
 )
 
-const FIND_REG_PART1 = `(mul\(\d+,\d+\))`
-const FIND_REG_PART2 = `(mul\(\d+,\d+\))`
-const PARSE_REG = `mul\((\d+),(\d+)\)`
+const FIND_OPS_PART1 = `(mul\(\d+,\d+\))`
+const FIND_OPS_PART2 = `((?:don't|do|mul)\(\d*,?\d*\))`
+const PARSE_MULTIPLIER = `mul\((\d+),(\d+)\)`
 
-func find(inputReader io.Reader, regexString string) []string {
+func findOps(inputReader io.Reader, reString string) []string {
 	scanner := bufio.NewScanner(inputReader)
-	re := regexp.MustCompile(regexString)
-	hits := make([]string, 0, 10)
+	re := regexp.MustCompile(reString)
+	ops := make([]string, 0, 10)
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		hits = append(hits, re.FindAllString(line, -1)...)
+		ops = append(ops, re.FindAllString(line, -1)...)
 	}
 
-	return hits
+	return ops
 }
 
-func parse(operations []string) [][]int {
-	parsedOperations := make([][]int, 0, len(operations))
-	re := regexp.MustCompile(PARSE_REG)
+func parseMultiply(ops []string, reString string) [][]int {
+	parsedOps := make([][]int, 0, len(ops))
+	re := regexp.MustCompile(reString)
 
-	for _, operation := range operations {
-		matches := re.FindStringSubmatch(operation)
+	for _, op := range ops {
+		matches := re.FindStringSubmatch(op)
 		matchesInt := utility.AtoiSlice(matches[1:])
-		parsedOperations = append(parsedOperations, matchesInt)
+		parsedOps = append(parsedOps, matchesInt)
 	}
 
-	return parsedOperations
+	return parsedOps
 }
 
-func multiplySum(operations [][]int) (sum int) {
-	for _, op := range operations {
+func multiplySum(ops [][]int) (sum int) {
+	for _, op := range ops {
 		sum += multiply(op)
 	}
 	return
@@ -54,21 +54,42 @@ func multiply(op []int) (result int) {
 }
 
 func partOne() {
-	inputReader := utility.GetInputReader()
-	foundOperations := find(inputReader, FIND_REG_PART1)
-	multiplicationSets := parse(foundOperations)
-	multplicationSum := multiplySum(multiplicationSets)
+	inputReader := utility.NewInputReader()
+	foundOps := findOps(inputReader, FIND_OPS_PART1)
+	multiplyOps := parseMultiply(foundOps, PARSE_MULTIPLIER)
+	sum := multiplySum(multiplyOps)
 
-	slog.Info("calculated result for input", "sum", multplicationSum)
+	slog.Info("part1: calculated result for input", "sum", sum)
 }
 
 func partTwo() {
-	inputReader := utility.GetInputReader()
-	foundOperations := find(inputReader, FIND_REG_PART2)
-	multiplicationSets := parse(foundOperations)
-	multplicationSum := multiplySum(multiplicationSets)
+	inputReader := utility.NewInputReader()
+	defer inputReader.Close()
 
-	slog.Info("calculated result for input", "sum", multplicationSum)
+	foundOps := findOps(inputReader, FIND_OPS_PART2)
+
+	// Now that we have all found ops including the don't() and do()
+	// we can loop threw them all and enable and disable instructions.
+	// We start with instructions enabled until we hit a don't() then
+	// re-enable when we hit a do() again.
+	enabledOps := make([]string, 0, len(foundOps)/2)
+	enabled := true
+	for _, op := range foundOps {
+		if op == "do()" {
+			enabled = true
+		} else if op == "don't()" {
+			enabled = false
+		} else {
+			if enabled {
+				enabledOps = append(enabledOps, op)
+			}
+		}
+	}
+
+	multiplyOps := parseMultiply(enabledOps, PARSE_MULTIPLIER)
+	su := multiplySum(multiplyOps)
+
+	slog.Info("part2: calculated result for input", "sum", su)
 }
 
 func main() {

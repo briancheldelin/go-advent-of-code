@@ -55,7 +55,7 @@ func saftyCheck(report []int) bool {
 }
 
 func main() {
-	inputReader := utility.GetInputReader()
+	inputReader := utility.NewInputReader()
 	defer inputReader.Close()
 
 	safeLevels := 0

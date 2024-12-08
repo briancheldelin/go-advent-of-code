@@ -82,7 +82,7 @@ func countMatches(match int, locations []int) (count int) {
 }
 
 func main() {
-	inputReader := utility.GetInputReader()
+	inputReader := utility.NewInputReader()
 	defer inputReader.Close()
 
 	locations1, locations2 := parse(inputReader)

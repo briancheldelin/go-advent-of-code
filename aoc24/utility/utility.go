@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func GetInputReader() *os.File {
+func NewInputReader() *os.File {
 	inputReader, err := os.Open("input.txt")
 
 	if err != nil {

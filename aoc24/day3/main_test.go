@@ -10,7 +10,7 @@ const TEST_STRING = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11
 func TestFind(t *testing.T) {
 	inputReader := strings.NewReader(TEST_STRING)
 
-	foundOperations := find(inputReader, FIND_REG_PART1)
+	foundOperations := findOps(inputReader, FIND_OPS_PART1)
 
 	if len(foundOperations) != 4 {
 		t.Error("did not get any hits when we expected some")
@@ -20,8 +20,8 @@ func TestFind(t *testing.T) {
 
 func TestParse(t *testing.T) {
 	inputReader := strings.NewReader(TEST_STRING)
-	foundOperations := find(inputReader, FIND_REG_PART1)
-	multiplicationSets := parse(foundOperations)
+	foundOperations := findOps(inputReader, FIND_OPS_PART1)
+	multiplicationSets := parseMultiply(foundOperations)
 
 	if len(multiplicationSets) != 4 {
 		t.Error("did not get any multiplication sets")
@@ -30,8 +30,8 @@ func TestParse(t *testing.T) {
 
 func TestMultiplySum(t *testing.T) {
 	inputReader := strings.NewReader(TEST_STRING)
-	foundOperations := find(inputReader, FIND_REG_PART1)
-	multiplicationSets := parse(foundOperations)
+	foundOperations := findOps(inputReader, FIND_OPS_PART1)
+	multiplicationSets := parseMultiply(foundOperations)
 
 	multplicationSum := multiplySum(multiplicationSets)
 
