@@ -2,7 +2,14 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log/slog"
+	"os"
+	"time"
+
+	"github.com/charmbracelet/bubbles/table"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 const INPUT_EXAMPLE = `MMMSXXMASM
@@ -22,7 +29,7 @@ const XMAS = `XMAS`
 
 type direction func(int, int) (int, int)
 
-func startSearch(x, y int, matrix *[][]byte, letter int) int {
+func startSearch(x, y int, matrix *matrix, letter int) int {
 
 	// Check if we are an the begenning
 	testChar := XMAS[letter]
@@ -72,7 +79,7 @@ func startSearch(x, y int, matrix *[][]byte, letter int) int {
 	return found
 }
 
-func searchDirection(x int, y int, d direction, matrix *[][]byte, letter int) bool {
+func searchDirection(x int, y int, d direction, matrix *matrix, letter int) bool {
 	// Check if we are finished
 	if letter == len(XMAS)-1 {
 		slog.Debug("we found the entire XMAS")
@@ -109,25 +116,161 @@ func outsideBoundry(x, y, h, w int) bool {
 	return false // We are not outside the boundry
 }
 
-func main() {
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+//
+// Lipgloss
+//
 
-	input := []byte(INPUT_EXAMPLE)
+var baseStyle = lipgloss.NewStyle().
+	BorderStyle(lipgloss.NormalBorder()).
+	BorderForeground(lipgloss.Color("240"))
 
-	matrix := bytes.Split(input, []byte("\n"))
+//
+// Buble Tea fun
+///
 
-	hight := len(matrix)
-	width := len(matrix[0])
+type matrix [][]byte
 
-	var found = 0
+func initModel() model {
 
-	for y := 0; y < hight; y++ {
-		for x := 0; x < width; x++ {
-			// Start the search and go negative so we search from start
-			found += startSearch(x, y, &matrix, 0)
-		}
+	inputMatrix := matrix(bytes.Split([]byte(INPUT_EXAMPLE), []byte("\n")))
+
+	rows := []table.Row{}
+	for _, row := range inputMatrix {
+		rows = append(rows, table.Row{string(row)})
 	}
 
-	slog.Info("done searching for XMAS", "count", found)
+	t := table.New(
+		table.WithRows(rows),
+	)
+
+	s := table.DefaultStyles()
+
+	s.Selected = s.Selected.
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
+
+	t.SetStyles(s)
+
+	return model{
+		grid:   matrix(bytes.Split([]byte(INPUT_EXAMPLE), []byte("\n"))),
+		xFocus: 0,
+		yFocus: 0,
+		done:   false,
+		view: searchView{
+			header: "Lets save XMAS?\n\n",
+			table:  t,
+			footer: "\nPress q to quit.\n",
+		},
+	}
+}
+
+type searchView struct {
+	header string
+	table  table.Model
+	footer string
+}
+
+type model struct {
+	grid   matrix
+	xFocus int
+	yFocus int
+	done   bool
+	view   searchView
+}
+
+func (m model) Init() tea.Cmd {
+	return searchTick()
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+
+	// Is it a key press?
+	case tea.KeyMsg:
+
+		// Cool, what was the actual key pressed?
+		switch msg.String() {
+
+		// These keys should exit the program.
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		}
+
+	case frameMsg:
+		if m.done {
+			return m, searchTick()
+		}
+
+		found := startSearch(m.xFocus, m.yFocus, &m.grid, 0)
+
+		if found > 0 {
+			m.grid[m.yFocus][m.xFocus] = '*'
+		}
+
+		if m.xFocus == len(m.grid[m.xFocus])-1 && m.yFocus == len(m.grid)-1 {
+			// We are at the end of the grid
+			m.done = true
+		} else if m.xFocus < len(m.grid[m.xFocus])-1 {
+			// Stay on same line
+			m.xFocus++
+		} else {
+			// Move to next line
+			m.xFocus = 0
+			m.yFocus++
+		}
+
+		return m, searchTick()
+	}
+
+	// Return the updated model to the Bubble Tea runtime for processing.
+	// Note that we're not returning a command.
+	return m, nil
+}
+
+func (m model) View() string {
+	// The header
+	s := "Lets save XMAS?\n\n"
+
+	// Iterate over our choices
+	s += baseStyle.Render(m.view.table.View()) + "\n"
+
+	// The footer
+	s += "\nPress q to quit.\n"
+
+	// Send the UI for rendering
+	return s
+}
+
+const FPS = 5
+
+type frameMsg struct{}
+
+func searchTick() tea.Cmd {
+	return tea.Tick(time.Second/FPS, func(_ time.Time) tea.Msg {
+		return frameMsg{}
+	})
+}
+
+func main() {
+	// slog.SetLogLoggerLevel(slog.LevelDebug)
+	// input := []byte(INPUT_EXAMPLE)
+	// matrix := bytes.Split(input, []byte("\n"))
+	// hight := len(matrix)
+	// width := len(matrix[0])
+	// var found = 0
+	// for y := 0; y < hight; y++ {
+	// 	for x := 0; x < width; x++ {
+	// 		// Start the search and go negative so we search from start
+	// 		found += startSearch(x, y, &matrix, 0)
+	// 	}
+	// }
+	// slog.Info("done searching for XMAS", "count", found)
+
+	p := tea.NewProgram(initModel())
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Alas, there's been an error: %v", err)
+		os.Exit(1)
+	}
 
 }
