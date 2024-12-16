@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"time"
+	"utility"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -53,8 +54,8 @@ func startSearch(x, y int, matrix *matrixV2, letter int) int {
 	down := func(x, y int) (int, int) { slog.Debug("searching down"); y++; return x, y }
 	downLeft := func(x, y int) (int, int) { slog.Debug("searching down left"); x--; y++; return x, y }
 	left := func(x, y int) (int, int) { slog.Debug("searching left"); x--; return x, y }
-	upLeft := func(x, y int) (int, int) { slog.Debug("searching up left"); x--; y++; return x, y }
-	up := func(x, y int) (int, int) { slog.Debug("searching up"); y++; return x, y }
+	upLeft := func(x, y int) (int, int) { slog.Debug("searching up left"); x--; y--; return x, y }
+	up := func(x, y int) (int, int) { slog.Debug("searching up"); y--; return x, y }
 	upRight := func(x, y int) (int, int) { slog.Debug("searching up right"); x++; y--; return x, y }
 
 	found := 0
@@ -106,7 +107,7 @@ func searchDirection(x int, y int, d direction, matrix *matrixV2, letter int) bo
 
 	if (*matrix)[y][x].character == XMAS[letter] {
 		// check if we are at the end
-		if letter == len(XMAS) {
+		if letter == len(XMAS)-1 {
 			(*matrix)[y][x].color = Green
 			return true
 		}
@@ -158,8 +159,9 @@ func (m *matrixV2) render() (output string) {
 	return
 }
 
-func initModel() model {
-	input := bytes.Split([]byte(INPUT_EXAMPLE), []byte("\n"))
+func initModel() *model {
+	// input := bytes.Split([]byte(INPUT_EXAMPLE), []byte("\n"))
+	input := bytes.Split(utility.InputString(), []byte("\n"))
 
 	g := make(matrixV2, len(input))
 
@@ -170,8 +172,8 @@ func initModel() model {
 		}
 	}
 
-	return model{
-		grid:   g,
+	return &model{
+		grid:   &g,
 		xFocus: 0,
 		yFocus: 0,
 		total:  0,
@@ -180,18 +182,18 @@ func initModel() model {
 }
 
 type model struct {
-	grid   matrixV2
+	grid   *matrixV2
 	xFocus int
 	yFocus int
 	total  int
 	done   bool
 }
 
-func (m model) Init() tea.Cmd {
+func (m *model) Init() tea.Cmd {
 	return searchTick()
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	// Is it a key press?
@@ -210,17 +212,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, searchTick()
 		}
 
-		found := startSearch(m.xFocus, m.yFocus, &m.grid, 0)
+		found := startSearch(m.xFocus, m.yFocus, m.grid, 0)
 		m.total += found
 
 		if found > 0 {
-			m.grid[m.yFocus][m.xFocus].color = Red
+			(*m.grid)[m.yFocus][m.xFocus].color = Red
 		}
 
-		if m.xFocus == len(m.grid[m.xFocus])-1 && m.yFocus == len(m.grid)-1 {
+		if m.xFocus == len((*m.grid)[m.xFocus])-1 && m.yFocus == len((*m.grid))-1 {
 			// We are at the end of the grid
 			m.done = true
-		} else if m.xFocus < len(m.grid[m.xFocus])-1 {
+		} else if m.xFocus < len((*m.grid)[m.xFocus])-1 {
 			// Stay on same line
 			m.xFocus++
 		} else {
@@ -237,7 +239,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() string {
+func (m *model) View() string {
 	// The header
 	s := "Lets save XMAS?\n\n"
 
@@ -253,35 +255,24 @@ func (m model) View() string {
 	return s
 }
 
-const FPS = 5
+// const FPS = 240
 
 type frameMsg struct{}
 
 func searchTick() tea.Cmd {
-	return tea.Tick(time.Second/FPS, func(_ time.Time) tea.Msg {
+	return tea.Tick(time.Millisecond, func(_ time.Time) tea.Msg {
 		return frameMsg{}
 	})
 }
 
-func main() {
-	// slog.SetLogLoggerLevel(slog.LevelDebug)
-	// input := []byte(INPUT_EXAMPLE)
-	// matrix := bytes.Split(input, []byte("\n"))
-	// hight := len(matrix)
-	// width := len(matrix[0])
-	// var found = 0
-	// for y := 0; y < hight; y++ {
-	// 	for x := 0; x < width; x++ {
-	// 		// Start the search and go negative so we search from start
-	// 		found += startSearch(x, y, &matrix, 0)
-	// 	}
-	// }
-	// slog.Info("done searching for XMAS", "count", found)
-
+func visWork() {
 	p := tea.NewProgram(initModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
+}
 
+func main() {
+	visWork()
 }

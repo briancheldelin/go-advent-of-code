@@ -1,6 +1,7 @@
 package utility
 
 import (
+	"io"
 	"log/slog"
 	"os"
 	"strconv"
@@ -14,6 +15,16 @@ func NewInputReader() *os.File {
 	}
 
 	return inputReader
+}
+
+func InputString() []byte {
+	inputFile := NewInputReader()
+
+	if b, err := io.ReadAll(inputFile); err == nil {
+		return b
+	}
+
+	return nil
 }
 
 func AtoiSlice(d []string) []int {
