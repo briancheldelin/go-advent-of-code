@@ -7,9 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 const INPUT_EXAMPLE = `MMMSXXMASM
@@ -27,13 +25,23 @@ const X, M, A, S byte = 'X', 'M', 'A', 'S'
 
 const XMAS = `XMAS`
 
+var Reset = "\033[0m"
+var Red = "\033[31m"
+var Green = "\033[32m"
+var Yellow = "\033[33m"
+var Blue = "\033[34m"
+var Magenta = "\033[35m"
+var Cyan = "\033[36m"
+var Gray = "\033[37m"
+var White = "\033[97m"
+
 type direction func(int, int) (int, int)
 
-func startSearch(x, y int, matrix *matrix, letter int) int {
+func startSearch(x, y int, matrix *matrixV2, letter int) int {
 
 	// Check if we are an the begenning
 	testChar := XMAS[letter]
-	if (*matrix)[y][x] != testChar {
+	if (*matrix)[y][x].character != testChar {
 		return 0
 	}
 	slog.Debug("We found an X")
@@ -79,12 +87,12 @@ func startSearch(x, y int, matrix *matrix, letter int) int {
 	return found
 }
 
-func searchDirection(x int, y int, d direction, matrix *matrix, letter int) bool {
-	// Check if we are finished
-	if letter == len(XMAS)-1 {
-		slog.Debug("we found the entire XMAS")
-		return true // We found all of XMAS!
-	}
+func searchDirection(x int, y int, d direction, matrix *matrixV2, letter int) bool {
+	// // Check if we are finished
+	// if letter == len(XMAS) {
+	// 	slog.Debug("we found the entire XMAS")
+	// 	return true // We found all of XMAS!
+	// }
 
 	// Mutate the x, y for the direction we are searching.
 	x, y = d(x, y)
@@ -96,9 +104,19 @@ func searchDirection(x int, y int, d direction, matrix *matrix, letter int) bool
 		return false
 	}
 
-	if (*matrix)[y][x] == XMAS[letter] {
+	if (*matrix)[y][x].character == XMAS[letter] {
+		// check if we are at the end
+		if letter == len(XMAS) {
+			(*matrix)[y][x].color = Green
+			return true
+		}
 		// Search for the next letter in the direction
-		return searchDirection(x, y, d, matrix, letter+1)
+		if searchDirection(x, y, d, matrix, letter+1) {
+			(*matrix)[y][x].color = Green
+			return true
+		} else {
+			return false
+		}
 	}
 	return false
 }
@@ -117,66 +135,56 @@ func outsideBoundry(x, y, h, w int) bool {
 }
 
 //
-// Lipgloss
-//
-
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("240"))
-
-//
 // Buble Tea fun
-///
+//
 
-type matrix [][]byte
+type matrixV2 [][]cell
 
-func initModel() model {
-
-	inputMatrix := matrix(bytes.Split([]byte(INPUT_EXAMPLE), []byte("\n")))
-
-	rows := []table.Row{}
-	for _, row := range inputMatrix {
-		rows = append(rows, table.Row{string(row)})
-	}
-
-	t := table.New(
-		table.WithRows(rows),
-	)
-
-	s := table.DefaultStyles()
-
-	s.Selected = s.Selected.
-		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
-		Bold(false)
-
-	t.SetStyles(s)
-
-	return model{
-		grid:   matrix(bytes.Split([]byte(INPUT_EXAMPLE), []byte("\n"))),
-		xFocus: 0,
-		yFocus: 0,
-		done:   false,
-		view: searchView{
-			header: "Lets save XMAS?\n\n",
-			table:  t,
-			footer: "\nPress q to quit.\n",
-		},
-	}
+type cell struct {
+	character byte
+	color     string
 }
 
-type searchView struct {
-	header string
-	table  table.Model
-	footer string
+func (m *matrixV2) render() (output string) {
+	for y := range *m {
+		for x := range (*m)[y] {
+			output += string((*m)[y][x].color)
+			output += string((*m)[y][x].character)
+			output += Reset
+		}
+		output += "\n"
+	}
+	output += "\033[0m"
+	return
+}
+
+func initModel() model {
+	input := bytes.Split([]byte(INPUT_EXAMPLE), []byte("\n"))
+
+	g := make(matrixV2, len(input))
+
+	for y := range input {
+		g[y] = make([]cell, len(input[y]))
+		for x := range input[y] {
+			g[y][x] = cell{input[y][x], ""}
+		}
+	}
+
+	return model{
+		grid:   g,
+		xFocus: 0,
+		yFocus: 0,
+		total:  0,
+		done:   false,
+	}
 }
 
 type model struct {
-	grid   matrix
+	grid   matrixV2
 	xFocus int
 	yFocus int
+	total  int
 	done   bool
-	view   searchView
 }
 
 func (m model) Init() tea.Cmd {
@@ -203,9 +211,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		found := startSearch(m.xFocus, m.yFocus, &m.grid, 0)
+		m.total += found
 
 		if found > 0 {
-			m.grid[m.yFocus][m.xFocus] = '*'
+			m.grid[m.yFocus][m.xFocus].color = Red
 		}
 
 		if m.xFocus == len(m.grid[m.xFocus])-1 && m.yFocus == len(m.grid)-1 {
@@ -233,7 +242,9 @@ func (m model) View() string {
 	s := "Lets save XMAS?\n\n"
 
 	// Iterate over our choices
-	s += baseStyle.Render(m.view.table.View()) + "\n"
+	s += m.grid.render()
+
+	s += fmt.Sprintf("\nTotal Found: %d\n", m.total)
 
 	// The footer
 	s += "\nPress q to quit.\n"
