@@ -75,7 +75,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if !m.done {
-			found := startSearch(m.xFocus, m.yFocus, m.grid, 0)
+			found := startSearch(m.xFocus, m.yFocus, m.grid, 0, &m.searchFuncs)
 			m.total += found
 
 			if found > 0 {
@@ -128,7 +128,7 @@ func (m *model) View() (s string) {
 
 	s += fmt.Sprintf("%s\n", m.headerView())
 	s += fmt.Sprintf("%s\n", m.viewport.View())
-	s += fmt.Sprintf("%s", m.footerView())
+	s += m.footerView()
 
 	return s
 }
@@ -136,7 +136,7 @@ func (m *model) View() (s string) {
 type frameMsg struct{}
 
 func searchTick() tea.Cmd {
-	return tea.Tick(time.Second/120, func(_ time.Time) tea.Msg {
+	return tea.Tick(time.Second/280, func(_ time.Time) tea.Msg {
 		return frameMsg{}
 	})
 }

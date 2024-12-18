@@ -26,19 +26,7 @@ const X, M, A, S byte = 'X', 'M', 'A', 'S'
 
 const XMAS = `XMAS`
 
-// var Reset = "\033[0m"
-// var Red = "\033[31m"
-// var Green = "\033[32m"
-// var Yellow = "\033[33m"
-// var Blue = "\033[34m"
-// var Magenta = "\033[35m"
-// var Cyan = "\033[36m"
-// var Gray = "\033[37m"
-// var White = "\033[97m"
-
-type direction func(int, int) (int, int)
-
-func startSearch(x, y int, matrix *matrixV2, letter int) int {
+func startSearch(x, y int, matrix *matrixV2, letter int, searchFuncs *[]SearchFunc) int {
 
 	// Check if we are an the begenning
 	testChar := XMAS[letter]
@@ -49,46 +37,18 @@ func startSearch(x, y int, matrix *matrixV2, letter int) int {
 
 	letter++ // Now we searh for the next letter
 
-	right := func(x, y int) (int, int) { slog.Debug("searching right"); x++; return x, y }
-	downRight := func(x, y int) (int, int) { slog.Debug("searching down right"); x++; y++; return x, y }
-	down := func(x, y int) (int, int) { slog.Debug("searching down"); y++; return x, y }
-	downLeft := func(x, y int) (int, int) { slog.Debug("searching down left"); x--; y++; return x, y }
-	left := func(x, y int) (int, int) { slog.Debug("searching left"); x--; return x, y }
-	upLeft := func(x, y int) (int, int) { slog.Debug("searching up left"); x--; y--; return x, y }
-	up := func(x, y int) (int, int) { slog.Debug("searching up"); y--; return x, y }
-	upRight := func(x, y int) (int, int) { slog.Debug("searching up right"); x++; y--; return x, y }
-
 	found := 0
 
-	if searchDirection(x, y, right, matrix, letter) {
-		found++
-	}
-	if searchDirection(x, y, downRight, matrix, letter) {
-		found++
-	}
-	if searchDirection(x, y, down, matrix, letter) {
-		found++
-	}
-	if searchDirection(x, y, downLeft, matrix, letter) {
-		found++
-	}
-	if searchDirection(x, y, left, matrix, letter) {
-		found++
-	}
-	if searchDirection(x, y, upLeft, matrix, letter) {
-		found++
-	}
-	if searchDirection(x, y, up, matrix, letter) {
-		found++
-	}
-	if searchDirection(x, y, upRight, matrix, letter) {
-		found++
+	for _, searchFunction := range *searchFuncs {
+		if searchDirection(x, y, searchFunction, matrix, letter) {
+			found++
+		}
 	}
 
 	return found
 }
 
-func searchDirection(x int, y int, d direction, matrix *matrixV2, letter int) bool {
+func searchDirection(x int, y int, d SearchFunc, matrix *matrixV2, letter int) bool {
 
 	// Mutate the x, y for the direction we are searching.
 	x, y = d(x, y)
@@ -137,6 +97,8 @@ type cell struct {
 	color     string
 }
 
+type SearchFunc func(int, int) (int, int)
+
 func initModel() *model {
 	// input := bytes.Split([]byte(INPUT_EXAMPLE), []byte("\n"))
 	input := bytes.Split(utility.InputString(), []byte("\n"))
@@ -150,23 +112,36 @@ func initModel() *model {
 		}
 	}
 
+	searchFuncs := []SearchFunc{
+		func(x, y int) (int, int) { x++; return x, y },
+		func(x, y int) (int, int) { x++; y++; return x, y },
+		func(x, y int) (int, int) { y++; return x, y },
+		func(x, y int) (int, int) { x--; y++; return x, y },
+		func(x, y int) (int, int) { x--; return x, y },
+		func(x, y int) (int, int) { x--; y--; return x, y },
+		func(x, y int) (int, int) { y--; return x, y },
+		func(x, y int) (int, int) { x++; y--; return x, y },
+	}
+
 	return &model{
-		grid:   &g,
-		xFocus: 0,
-		yFocus: 0,
-		total:  0,
-		done:   false,
+		grid:        &g,
+		xFocus:      0,
+		yFocus:      0,
+		total:       0,
+		done:        false,
+		searchFuncs: searchFuncs,
 	}
 }
 
 type model struct {
-	grid     *matrixV2
-	xFocus   int
-	yFocus   int
-	total    int
-	done     bool
-	viewport viewport.Model
-	ready    bool
+	grid        *matrixV2
+	xFocus      int
+	yFocus      int
+	total       int
+	done        bool
+	viewport    viewport.Model
+	ready       bool
+	searchFuncs []SearchFunc
 }
 
 func visWork() {
