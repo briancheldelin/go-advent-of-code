@@ -136,7 +136,7 @@ func (m *model) View() (s string) {
 type frameMsg struct{}
 
 func searchTick() tea.Cmd {
-	return tea.Tick(time.Second/60, func(_ time.Time) tea.Msg {
+	return tea.Tick(time.Second/120, func(_ time.Time) tea.Msg {
 		return frameMsg{}
 	})
 }
@@ -146,7 +146,7 @@ func (m *model) Init() tea.Cmd {
 }
 
 func (m model) headerView() string {
-	title := titleStyle.Render("Finding XMAS!")
+	title := titleStyle.Render(fmt.Sprintf("Finding XMAS! Current: %d", m.total))
 	line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title)))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
