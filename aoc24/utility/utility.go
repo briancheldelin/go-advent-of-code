@@ -7,8 +7,8 @@ import (
 	"strconv"
 )
 
-func NewInputReader() *os.File {
-	inputReader, err := os.Open("input.txt")
+func NewInputReader(filename string) *os.File {
+	inputReader, err := os.Open(filename)
 
 	if err != nil {
 		slog.Error("got an error while trying to open input file", "Error", err)
@@ -18,7 +18,29 @@ func NewInputReader() *os.File {
 }
 
 func InputString() []byte {
-	inputFile := NewInputReader()
+	inputFile := NewInputReader("input.txt")
+
+	if b, err := io.ReadAll(inputFile); err == nil {
+		return b
+	}
+
+	return nil
+}
+
+// Gets the problem input from the same directory as package
+func GetInput() []byte {
+	inputFile := NewInputReader("input.txt")
+
+	if b, err := io.ReadAll(inputFile); err == nil {
+		return b
+	}
+
+	return nil
+}
+
+// Gets the example input from the same directory as package.
+func GetExampleInput() []byte {
+	inputFile := NewInputReader("input-example.txt")
 
 	if b, err := io.ReadAll(inputFile); err == nil {
 		return b
