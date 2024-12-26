@@ -26,4 +26,8 @@ go.work.sum
 
 # Advent of code stuff
 input.txt
+input-example.txt
 bin/
+
+# Mac stuff
+.DS_Store
