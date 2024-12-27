@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -63,7 +64,15 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
+		case "k":
+			fmt.Println("Killing program")
+			os.Exit(0)
+		case "f":
+			m.fps = m.fps * 2
+		case "s":
+			m.fps = m.fps / 2
 		}
+
 		// Handle keyboard and mouse events in the viewport
 		m.viewport, cmd = m.viewport.Update(msg)
 		cmds = append(cmds, cmd)
@@ -78,7 +87,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !m.done {
 			// Call the models Tick function for the frame
 			// This is called at the speed of ticks
-			m.challange.DoWork()
+			m.done = !m.challange.DoWork()
 
 			// Extract our grid as a color grid
 			m.viewport.SetContent(m.challange.Render())
