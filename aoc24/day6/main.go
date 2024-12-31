@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
-	"github.com/bcheldelin/go-advent-of-code/aoc24/utility/grid"
-	"github.com/bcheldelin/go-advent-of-code/aoc24/utility/gui"
+	"github.com/briancheldelin/go-advent-of-code/aoc24/utility"
+	"github.com/briancheldelin/go-advent-of-code/aoc24/utility/grid"
+	"github.com/briancheldelin/go-advent-of-code/aoc24/utility/gui"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

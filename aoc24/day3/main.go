@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"regexp"
 
-	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
+	"github.com/briancheldelin/go-advent-of-code/aoc24/utility"
 )
 
 const FIND_OPS_PART1 = `(mul\(\d+,\d+\))`

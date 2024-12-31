@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/bcheldelin/go-advent-of-code/aoc24/utility/grid"
+	"github.com/briancheldelin/go-advent-of-code/aoc24/utility/grid"
 )
 
 type ChallangeTestCase struct {

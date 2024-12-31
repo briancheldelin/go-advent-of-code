@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
+	"github.com/briancheldelin/go-advent-of-code/aoc24/utility"
 )
 
 func parse(dataInput io.Reader) (array1 []int, array2 []int) {

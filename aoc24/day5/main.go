@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
+	"github.com/briancheldelin/go-advent-of-code/aoc24/utility"
 )
 
 type UpdateRules map[int][]int

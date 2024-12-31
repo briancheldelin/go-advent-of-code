@@ -1,3 +1,3 @@
-module github.com/bcheldelin/go-advent-of-code/aoc24/utility/grid
+module github.com/briancheldelin/go-advent-of-code/aoc24/utility/grid
 
 go 1.23.2
