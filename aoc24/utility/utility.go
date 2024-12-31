@@ -49,6 +49,17 @@ func GetExampleInput() []byte {
 	return nil
 }
 
+func GetInputStringByPath(path string) string {
+	inputFile := NewInputReader(path)
+	defer inputFile.Close()
+
+	if b, err := io.ReadAll(inputFile); err == nil {
+		return string(b)
+	}
+
+	return ""
+}
+
 func AtoiSlice(d []string) []int {
 	intSlice := make([]int, len(d))
 	for i, e := range d {
