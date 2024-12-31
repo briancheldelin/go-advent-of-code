@@ -246,21 +246,10 @@ func isDirection(b byte) bool {
 }
 
 func processChallange(c *Challange) bool {
-	// fmt.Printf("Checking Solution #%d: ", c.id)
 	for c.DoWork() {
-		// Check if we are stuck in a loop
-		// if c.totalMoves >= 10000 {
-		// 	visulizeChallange(c)
-		// }
-		// Check if we are in a loop
-		// if c.movesSinceUnique >= 1000 {
-		// 	c.part2Solution = true
-		// 	break
-		// }
 
 		continue
 	}
-	// fmt.Printf("moves=%d, unique=%d ", c.totalMoves, c.searchedSpaces)
 	return true
 }
 
