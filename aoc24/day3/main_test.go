@@ -21,7 +21,7 @@ func TestFind(t *testing.T) {
 func TestParse(t *testing.T) {
 	inputReader := strings.NewReader(TEST_STRING)
 	foundOperations := findOps(inputReader, FIND_OPS_PART1)
-	multiplicationSets := parseMultiply(foundOperations)
+	multiplicationSets := parseMultiply(foundOperations, PARSE_MULTIPLIER)
 
 	if len(multiplicationSets) != 4 {
 		t.Error("did not get any multiplication sets")
@@ -31,7 +31,7 @@ func TestParse(t *testing.T) {
 func TestMultiplySum(t *testing.T) {
 	inputReader := strings.NewReader(TEST_STRING)
 	foundOperations := findOps(inputReader, FIND_OPS_PART1)
-	multiplicationSets := parseMultiply(foundOperations)
+	multiplicationSets := parseMultiply(foundOperations, PARSE_MULTIPLIER)
 
 	multplicationSum := multiplySum(multiplicationSets)
 

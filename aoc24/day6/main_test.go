@@ -1,8 +1,9 @@
 package main
 
 import (
-	"grid"
 	"testing"
+
+	"github.com/bcheldelin/go-advent-of-code/aoc24/utility/grid"
 )
 
 type ChallangeTestCase struct {

@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"utility"
+	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
 )
 
 func checkLevel(level []int) bool {
@@ -55,7 +55,7 @@ func saftyCheck(report []int) bool {
 }
 
 func main() {
-	inputReader := utility.NewInputReader()
+	inputReader := utility.NewInputReader("input.txt")
 	defer inputReader.Close()
 
 	safeLevels := 0

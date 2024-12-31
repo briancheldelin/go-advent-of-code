@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"utility"
+	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
 )
 
 func parse(dataInput io.Reader) (array1 []int, array2 []int) {
@@ -82,7 +82,7 @@ func countMatches(match int, locations []int) (count int) {
 }
 
 func main() {
-	inputReader := utility.NewInputReader()
+	inputReader := utility.NewInputReader("input.txt")
 	defer inputReader.Close()
 
 	locations1, locations2 := parse(inputReader)

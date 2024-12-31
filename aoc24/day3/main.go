@@ -5,7 +5,8 @@ import (
 	"io"
 	"log/slog"
 	"regexp"
-	"utility"
+
+	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
 )
 
 const FIND_OPS_PART1 = `(mul\(\d+,\d+\))`
@@ -54,7 +55,7 @@ func multiply(op []int) (result int) {
 }
 
 func partOne() {
-	inputReader := utility.NewInputReader()
+	inputReader := utility.NewInputReader("input.txt")
 	foundOps := findOps(inputReader, FIND_OPS_PART1)
 	multiplyOps := parseMultiply(foundOps, PARSE_MULTIPLIER)
 	sum := multiplySum(multiplyOps)
@@ -63,7 +64,7 @@ func partOne() {
 }
 
 func partTwo() {
-	inputReader := utility.NewInputReader()
+	inputReader := utility.NewInputReader("input.txt")
 	defer inputReader.Close()
 
 	foundOps := findOps(inputReader, FIND_OPS_PART2)

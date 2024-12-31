@@ -5,7 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"utility"
+
+	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
 )
 
 type calibration struct {

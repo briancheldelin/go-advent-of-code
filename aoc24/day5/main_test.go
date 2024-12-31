@@ -3,7 +3,7 @@ package main
 import (
 	"slices"
 	"testing"
-	"utility"
+	"github.com/bcheldelin/go-advent-of-code/aoc24/utility"
 )
 
 const EXAMPLE = `
