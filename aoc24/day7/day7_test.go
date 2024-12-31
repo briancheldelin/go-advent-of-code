@@ -53,7 +53,35 @@ func TestSearch(t *testing.T) {
 			}
 		})
 	}
+}
 
+func TestSearchV2(t *testing.T) {
+	tests := []SearchTest{
+		{"3: 1 1 1", true},
+		{"190: 10 19", true},
+		{"3267: 81 40 27", true},
+		{"83: 17 5", false},
+		{"156: 15 6", true},
+		{"7290: 6 8 6 15", true},
+		{"161011: 16 10 13", false},
+		{"192: 17 8 14", true},
+		{"21037: 9 7 18 13", false},
+		{"292: 11 6 16 20", true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			c := NewCalibration(test.input)
+			addFirstSearch := c.SearchV2('+', 1, c.ops[0])
+			multiFirstSearch := c.SearchV2('*', 1, c.ops[0])
+			concatFirstSearch := c.SearchV2('|', 1, c.ops[0])
+
+			// If eaither search paths is true then don't fail the test
+			if !(addFirstSearch == test.expect || multiFirstSearch == test.expect || concatFirstSearch == test.expect) {
+				t.Error("We did not get the expected result")
+			}
+		})
+	}
 }
 
 func TestPart1(t *testing.T) {
