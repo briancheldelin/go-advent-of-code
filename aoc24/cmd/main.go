@@ -37,9 +37,10 @@ func RunChallange(cmd *cobra.Command, args []string) {
 
 	var filename string
 	if example {
-		filename = "input.txt"
-	} else {
+		slog.Info("using example input")
 		filename = "input-example.txt"
+	} else {
+		filename = "input.txt"
 	}
 
 	input := utility.GetInputStringByPath(fmt.Sprintf("../day%d/%s", day, filename))
