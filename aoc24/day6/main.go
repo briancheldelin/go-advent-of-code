@@ -51,10 +51,6 @@ type Challange struct {
 }
 
 func NewChallange(id int, inputGrid grid.Grid) *Challange {
-	// input := utility.GetExampleInput()
-	// input := utility.GetInput()
-
-	// grid := grid.NewGrid(input)
 
 	c := Challange{
 		id:             id,
