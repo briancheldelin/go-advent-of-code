@@ -46,18 +46,23 @@ func joltageTwoDigit(bank string) (jolts int) {
 }
 
 func part2(input string) {
-	cores := runtime.NumCPU()
+	sum := part2Runner(input, runtime.NumCPU())
+	slog.Info("Part twp finished", "solution", sum)
+}
+
+func part2Runner(input string, runners int) int {
+
 	var sum int
 
 	// Create channels
 	workCh := make(chan string, 300)
 	sumCh := make(chan int)
-	for range cores {
+	for range runners {
 		go worker(workCh, sumCh)
 	}
 
 	// Send work to channel
-	for bank := range strings.SplitSeq(input, "\n") {
+	for bank := range strings.SplitSeq(input, "\r\n") {
 		workCh <- bank
 	}
 
@@ -65,8 +70,7 @@ func part2(input string) {
 	for result := range sumCh {
 		sum += result
 	}
-
-	slog.Info("Part twp finished", "solution", sum)
+	return sum
 }
 
 func worker(workCh chan string, sumCh chan int) {

@@ -83,3 +83,21 @@ func Test_digit(t *testing.T) {
 		})
 	}
 }
+
+func Test_part2Runner(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  int
+	}{
+		{name: "Example", input: "987654321111111\r\n811111111111119\r\n234234234234278\r\n818181911112111", want: 3121910778619},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := part2Runner(tt.input, 1)
+			if got != tt.want {
+				t.Errorf("part2Runner() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
