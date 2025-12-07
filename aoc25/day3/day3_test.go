@@ -90,7 +90,7 @@ func Test_part2Runner(t *testing.T) {
 		input string
 		want  int
 	}{
-		{name: "Example", input: "987654321111111\r\n811111111111119\r\n234234234234278\r\n818181911112111", want: 3121910778619},
+		{name: "Example", input: "987654321111111\n811111111111119\n234234234234278\n818181911112111", want: 3121910778619},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -47,7 +48,7 @@ func joltageTwoDigit(bank string) (jolts int) {
 
 func part2(input string) {
 	sum := part2Runner(input, runtime.NumCPU())
-	slog.Info("Part twp finished", "solution", sum)
+	slog.Info("Part two finished", "solution", sum)
 }
 
 func part2Runner(input string, runners int) int {
@@ -55,32 +56,46 @@ func part2Runner(input string, runners int) int {
 	var sum int
 
 	// Create channels
-	workCh := make(chan string, 300)
-	sumCh := make(chan int)
+	workCh := make(chan string, 200)
+	sumCh := make(chan int, 200)
+	var wg sync.WaitGroup
+
 	for range runners {
-		go worker(workCh, sumCh)
+		wg.Go(func() {
+			worker(workCh, sumCh)
+		})
 	}
 
 	// Send work to channel
+	var count int
 	for bank := range strings.SplitSeq(input, "\r\n") {
 		workCh <- bank
+		count++
 	}
+	close(workCh)
+
+	wg.Wait()
 
 	// Get result from all.
-	for result := range sumCh {
+	for i := 0; i < count; i++ {
+		result := <-sumCh
+		slog.Info("Adding", "sum", result)
 		sum += result
 	}
+	slog.Info("Done adding", "sum", sum)
+	close(sumCh)
+
 	return sum
 }
 
 func worker(workCh chan string, sumCh chan int) {
-	bank, ok := <-workCh
-	if !ok {
-		return
+	slog.Info("Starting Working")
+	for bank := range workCh {
+		slog.Info("Processing", "bank", bank)
+		bankInt, _ := strconv.Atoi(bank)
+		sumCh <- joltageTwelveDigit(bankInt, len(bank))
 	}
-	slog.Info("Processing", "bank", bank)
-	bankInt, _ := strconv.Atoi(bank)
-	sumCh <- joltageTwelveDigit(bankInt, len(bank))
+	slog.Info("Worker Finished, Returning")
 }
 
 // Dont Judge me!!
